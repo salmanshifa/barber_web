@@ -1,0 +1,58 @@
+[2m10:33:41 PM[22m [33m[1m[vite][22m[39m [33mwarning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.[39m
+`optimizeDeps.rollupOptions` / `ssr.optimizeDeps.rollupOptions` is deprecated. Use `optimizeDeps.rolldownOptions` instead. Note that this option may be set by a plugin. Set VITE_DEPRECATION_TRACE=1 to see where it is called.
+[vite:react-babel] We recommend switching to `@vitejs/plugin-react-oxc` for improved performance. More information at https://vite.dev/rolldown
+[2m10:34:52 PM[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: D:\barber-project\barber-web\src\App.jsx: Identifier 'App' has already been declared. (545:9)
+
+[0m [90m 543 |[39m
+ [90m 544 |[39m [90m// Main App Component[39m
+[31m[1m>[22m[39m[90m 545 |[39m [36mfunction[39m [33mApp[39m() {
+ [90m     |[39m          [31m[1m^[22m[39m
+ [90m 546 |[39m   [36mconst[39m [isLoggedIn[33m,[39m setIsLoggedIn] [33m=[39m useState([36mfalse[39m)[33m;[39m
+ [90m 547 |[39m   [36mconst[39m [user[33m,[39m setUser] [33m=[39m useState([36mnull[39m)[33m;[39m
+ [90m 548 |[39m[0m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/barber-project/barber-web/src/App.jsx[39m:545:9
+[2m10:34:53 PM[22m [31m[1m[vite][22m[39m [31mInternal server error: D:\barber-project\barber-web\src\App.jsx: Identifier 'App' has already been declared. (545:9)
+
+[0m [90m 543 |[31m
+ [90m 544 |[31m [90m// Main App Component[31m
+[31m[1m>[22m[31m[90m 545 |[31m [36mfunction[31m [33mApp[31m() {
+ [90m     |[31m          [31m[1m^[22m[31m
+ [90m 546 |[31m   [36mconst[31m [isLoggedIn[33m,[31m setIsLoggedIn] [33m=[31m useState([36mfalse[31m)[33m;[31m
+ [90m 547 |[31m   [36mconst[31m [user[33m,[31m setUser] [33m=[31m useState([36mnull[31m)[33m;[31m
+ [90m 548 |[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mD:/barber-project/barber-web/src/App.jsx[39m:545:9
+      at constructor (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:365:19)
+      at JSXParserMixin.raise (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:6616:19)
+      at ScopeHandler.checkRedeclarationInScope (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:1619:19)
+      at ScopeHandler.declareName (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:1585:12)
+      at JSXParserMixin.registerFunctionStatementId (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:13483:16)
+      at JSXParserMixin.parseFunction (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:13467:12)
+      at JSXParserMixin.parseFunctionStatement (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:13142:17)
+      at JSXParserMixin.parseStatementContent (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:12808:21)
+      at JSXParserMixin.parseStatementLike (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:12784:17)
+      at JSXParserMixin.parseModuleItem (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:12761:17)
+      at JSXParserMixin.parseBlockOrModuleBlockBody (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:13333:36)
+      at JSXParserMixin.parseBlockBody (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:13326:10)
+      at JSXParserMixin.parseProgram (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:12639:10)
+      at JSXParserMixin.parseTopLevel (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:12629:25)
+      at JSXParserMixin.parse (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:14505:25)
+      at parse (D:\barber-project\barber-web\node_modules\@babel\parser\lib\index.js:14539:38)
+      at parser (D:\barber-project\barber-web\node_modules\@babel\core\lib\parser\index.js:41:34)
+      at parser.next (<anonymous>)
+      at normalizeFile (D:\barber-project\barber-web\node_modules\@babel\core\lib\transformation\normalize-file.js:51:37)
+      at normalizeFile.next (<anonymous>)
+      at run (D:\barber-project\barber-web\node_modules\@babel\core\lib\transformation\index.js:22:50)
+      at run.next (<anonymous>)
+      at transform (D:\barber-project\barber-web\node_modules\@babel\core\lib\transform.js:22:33)
+      at transform.next (<anonymous>)
+      at step (D:\barber-project\barber-web\node_modules\gensync\index.js:261:32)
+      at D:\barber-project\barber-web\node_modules\gensync\index.js:273:13
+      at async.call.result.err.err (D:\barber-project\barber-web\node_modules\gensync\index.js:223:11)
+      at D:\barber-project\barber-web\node_modules\gensync\index.js:189:28
+      at D:\barber-project\barber-web\node_modules\@babel\core\lib\gensync-utils\async.js:67:7
+      at D:\barber-project\barber-web\node_modules\gensync\index.js:113:33
+      at step (D:\barber-project\barber-web\node_modules\gensync\index.js:287:14)
+      at D:\barber-project\barber-web\node_modules\gensync\index.js:273:13
+      at async.call.result.err.err (D:\barber-project\barber-web\node_modules\gensync\index.js:223:11)
