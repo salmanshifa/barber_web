@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ThemeToggle } from './ThemeToggle';
-import { services, initialMessages } from '../data/constants';
+import { AddServiceModal } from './AddServiceModal';
+import { ServiceDetailModal } from './ServiceDetailModal';
+import { services as initialServices, initialMessages } from '../data/constants';
+import { fetchServices, createService, updateService, deleteService } from '../utils/api';
 
 const ownerQuickActions = [
   { icon: '📋', title: 'Manage Services', desc: 'Add, edit, or remove treatments', id: 'owner-services' },
@@ -33,6 +36,12 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
   const [activeTab, setActiveTab] = useState('owner-bookings');
   const [messages, setMessages] = useState(initialMessages);
   const [draft, setDraft] = useState('');
+  const [services, setServices] = useState(initialServices);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingService, setEditingService] = useState(null);
+  const [viewingService, setViewingService] = useState(null);
+  const [deletingService, setDeletingService] = useState(null);
+  const [notification, setNotification] = useState(null);
 
   const handleSend = (event) => {
     event.preventDefault();
@@ -50,6 +59,27 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // Fetch services from backend on mount
+  const loadServices = useCallback(async () => {
+    try {
+      const data = await fetchServices();
+      if (data.length > 0) setServices(data);
+    } catch {
+      // Backend unavailable — keep the initial/fallback services
+    }
+  }, []);
+
+  useEffect(() => {
+    loadServices();
+  }, [loadServices]);
+
+  // Auto-dismiss notification
+  useEffect(() => {
+    if (!notification) return;
+    const timer = setTimeout(() => setNotification(null), 4000);
+    return () => clearTimeout(timer);
+  }, [notification]);
+
   const getStatusBadge = (status) => {
     switch (status) {
       case 'confirmed': return '✓ Confirmed';
@@ -59,7 +89,7 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
     }
   };
 
-  const totalRevenue = services.reduce((sum, s) => sum + parseInt(s.price.slice(1)), 0);
+  const totalRevenue = services.reduce((sum, s) => sum + (parseInt((s.price || '').replace(/[^0-9]/g, ''), 10) || 0), 0);
   const totalBookings = todayAppointments.length;
 
   return (
@@ -172,8 +202,7 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
           <div>
             <p className="eyebrow">Treatments</p>
             <h2>Services Overview</h2>
-          </div>
-          <button className="btn btn-primary btn-sm">+ Add Service</button>
+          </div>            <button className="btn btn-primary btn-sm" onClick={() => setShowAddModal(true)}>+ Add Service</button>
         </div>
         <div className="owner-table">
           <div className="owner-table-header">
@@ -184,14 +213,10 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
             <span>Actions</span>
           </div>
           {services.map((service) => (
-            <div className="owner-table-row" key={service.title}>
+            <div className="owner-table-row" key={service.id || service.title}>
               <span className="owner-table-client">
                 <span className="owner-service-icon">
-                  {service.title.includes('Massage') ? '💆' :
-                   service.title.includes('Facial') ? '✨' :
-                   service.title.includes('Stone') ? '🪨' :
-                   service.title.includes('Hair') ? '💇' :
-                   service.title.includes('Manicure') ? '💅' : '🌿'}
+                  {service.icon || '🌟'}
                 </span>
                 {service.title}
               </span>
@@ -199,9 +224,9 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
               <span className="owner-table-price">{service.price}</span>
               <span><span className="owner-status owner-status-confirmed">✓ Active</span></span>
               <span className="owner-table-actions">
-                <button className="owner-action-btn" title="Edit">✏️</button>
-                <button className="owner-action-btn" title="Disable">👁️</button>
-                <button className="owner-action-btn" title="Delete">🗑️</button>
+                <button className="owner-action-btn" title="View details" onClick={() => setViewingService(service)}>👁️</button>
+                <button className="owner-action-btn" title="Edit service" onClick={() => setEditingService(service)}>✏️</button>
+                <button className="owner-action-btn" title="Delete service" onClick={() => setDeletingService(service)}>🗑️</button>
               </span>
             </div>
           ))}
@@ -320,6 +345,106 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
           </form>
         </div>
       </section>
+      {/* ── Notification ──────────────────── */}
+      {notification && (
+        <div className={`owner-notification owner-notification-${notification.type}`}>
+          <span className="owner-notification-icon">
+            {notification.type === 'success' ? '✅' : notification.type === 'error' ? '❌' : 'ℹ️'}
+          </span>
+          <span className="owner-notification-msg">{notification.message}</span>
+          <button className="owner-notification-close" onClick={() => setNotification(null)}>✕</button>
+        </div>
+      )}
+
+      {/* ── Add Service Modal ────────────── */}
+      {/* ── Add / Edit Service Modal ────── */}
+      <AddServiceModal
+        isOpen={showAddModal || !!editingService}
+        onClose={() => {
+          setShowAddModal(false);
+          setEditingService(null);
+        }}
+        editService={editingService}
+        onAdd={async (newService) => {
+          try {
+            const created = await createService(newService);
+            setServices((prev) => [...prev, created]);
+            setNotification({ type: 'success', message: `"${created.title}" has been added to your services.` });
+          } catch (err) {
+            setNotification({ type: 'error', message: err.message || 'Failed to add service.' });
+          }
+        }}
+        onEdit={async (updatedService) => {
+          try {
+            const saved = await updateService(updatedService.id, updatedService);
+            setServices((prev) =>
+              prev.map((s) => (s.id === saved.id ? saved : s))
+            );
+            setNotification({ type: 'success', message: `"${saved.title}" has been updated.` });
+          } catch (err) {
+            setNotification({ type: 'error', message: err.message || 'Failed to update service.' });
+          }
+        }}
+      />
+
+      {/* ── Delete Confirmation ─────────── */}
+      {deletingService && (
+        <div className="modal-overlay" onClick={() => setDeletingService(null)}>
+          <div
+            className="modal-container confirm-modal-container"
+            onClick={(e) => e.stopPropagation()}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="confirm-title"
+          >
+            <div className="modal-accent confirm-accent" />
+            <div className="confirm-body">
+              <span className="confirm-icon">🗑️</span>
+              <h3 id="confirm-title" className="confirm-title">Delete Service?</h3>
+              <p className="confirm-message">
+                Are you sure you want to remove <strong>"{deletingService.title}"</strong>?
+                This action cannot be undone.
+              </p>
+              <div className="confirm-actions">
+                <button
+                  className="btn btn-ghost confirm-cancel"
+                  onClick={() => setDeletingService(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn confirm-delete"
+                  onClick={async () => {
+                    const serviceToDelete = deletingService;
+                    setDeletingService(null);
+                    try {
+                      await deleteService(serviceToDelete.id);
+                      setServices((prev) => prev.filter((s) => s.id !== serviceToDelete.id));
+                      setNotification({ type: 'success', message: `"${serviceToDelete.title}" has been removed.` });
+                    } catch (err) {
+                      setNotification({ type: 'error', message: err.message || 'Failed to delete service.' });
+                    }
+                  }}
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── View Service Detail Modal ────── */}
+      <ServiceDetailModal
+        isOpen={!!viewingService}
+        onClose={() => setViewingService(null)}
+        service={viewingService}
+        onEdit={(service) => {
+          setViewingService(null);
+          // Wait for detail modal close animation before opening edit modal
+          setTimeout(() => setEditingService(service), 300);
+        }}
+      />
     </div>
   );
 }

@@ -1,10 +1,21 @@
 export const services = [
-  { title: 'Swedish Full Body Massage', time: '60 min', price: '$85' },
-  { title: 'Facial Rejuvenation', time: '50 min', price: '$75' },
-  { title: 'Hot Stone Therapy', time: '75 min', price: '$95' },
-  { title: 'Hair Styling & Cut', time: '45 min', price: '$65' },
-  { title: 'Manicure & Pedicure', time: '90 min', price: '$120' },
-  { title: 'Aromatherapy Massage', time: '55 min', price: '$80' },
+  { id: 's1', title: 'Swedish Full Body Massage', time: '60 min', price: '$85', category: 'massage', icon: '💆', description: 'A classic full-body relaxation massage using long, flowing strokes to ease tension and improve circulation.' },
+  { id: 's2', title: 'Facial Rejuvenation', time: '50 min', price: '$75', category: 'facial', icon: '✨', description: 'Deep-cleansing facial with organic serums designed to restore radiance and hydration.' },
+  { id: 's3', title: 'Hot Stone Therapy', time: '75 min', price: '$95', category: 'stone', icon: '🪨', description: 'Heated basalt stones placed on key points of the body to melt away deep muscle tension.' },
+  { id: 's4', title: 'Hair Styling & Cut', time: '45 min', price: '$65', category: 'hair', icon: '💇', description: 'Precision cut and professional styling tailored to your face shape and hair type.' },
+  { id: 's5', title: 'Manicure & Pedicure', time: '90 min', price: '$120', category: 'nails', icon: '💅', description: 'Complete nail care for hands and feet including shaping, cuticle care, and polish.' },
+  { id: 's6', title: 'Aromatherapy Massage', time: '55 min', price: '$80', category: 'aroma', icon: '🌿', description: 'Soothing massage with custom-blended essential oils tailored to your mood and needs.' },
+];
+
+export const SERVICE_CATEGORIES = [
+  { value: 'massage', label: 'Massage', icon: '💆' },
+  { value: 'facial', label: 'Facial', icon: '✨' },
+  { value: 'stone', label: 'Hot Stone', icon: '🪨' },
+  { value: 'hair', label: 'Hair', icon: '💇' },
+  { value: 'nails', label: 'Nails', icon: '💅' },
+  { value: 'aroma', label: 'Aromatherapy', icon: '🌿' },
+  { value: 'body', label: 'Body Treatment', icon: '🧴' },
+  { value: 'other', label: 'Other', icon: '🌟' },
 ];
 
 export const initialMessages = [
