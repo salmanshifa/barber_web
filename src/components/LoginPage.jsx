@@ -181,6 +181,11 @@ export function LoginPage({ onLogin, onBack, theme, onToggleTheme }) {
               <h3>I'm a Shop Owner</h3>
               <p>Manage your salon, staff, and bookings</p>
             </button>
+            <button className="type-card" onClick={() => setUserType('staff')}>
+              <div className="type-icon">🧑‍💼</div>
+              <h3>I'm a Staff Member</h3>
+              <p>View your schedule and manage appointments</p>
+            </button>
           </div>
           <div className="auth-back-link">
             <button className="btn btn-ghost" onClick={onBack}>← Back to Home</button>
@@ -197,7 +202,7 @@ export function LoginPage({ onLogin, onBack, theme, onToggleTheme }) {
         <ThemeToggle theme={theme} onToggle={onToggleTheme} className="auth-theme-toggle" />
         <div className="auth-header">
           <h2>{showRegister ? 'Create Account' : 'Sign In'}</h2>
-          <p>{userType === 'customer' ? 'Customer' : 'Shop Owner'} Portal</p>
+          <p>{userType === 'customer' ? 'Customer' : userType === 'staff' ? 'Staff' : 'Shop Owner'} Portal</p>
         </div>
 
         {error && <div className="auth-error">{error}</div>}

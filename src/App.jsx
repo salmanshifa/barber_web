@@ -4,6 +4,7 @@ import { HomePage } from './components/HomePage';
 import { LoginPage } from './components/LoginPage';
 import { OwnerDashboard } from './components/OwnerDashboard';
 import { CustomerDashboard } from './components/CustomerDashboard';
+import { StaffDashboard } from './components/StaffDashboard';
 import { Toast, useToast } from './components/Toast';
 import { ThemeToggle } from './components/ThemeToggle';
 import { API_BASE_URL } from './utils/api';
@@ -113,7 +114,7 @@ function App() {
         if (!data) throw new Error('No profile data');
 
         const userData = {
-          type: data.role === 'SHOP_OWNER' ? 'owner' : 'customer',
+          type: data.role === 'SHOP_OWNER' ? 'owner' : data.role === 'STAFF' ? 'staff' : 'customer',
           name: data.username || data.email?.split('@')[0],
           username: data.username,
           email: data.email,
@@ -164,7 +165,9 @@ function App() {
     <>
       <Toast toast={toast} onDismiss={dismissToast} />
       {isLoggedIn && page === 'dashboard' ? (
-        user.type === 'customer' ? (
+        user.type === 'staff' ? (
+          <StaffDashboard user={user} onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme} />
+        ) : user.type === 'customer' ? (
           <CustomerDashboard user={user} onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme} />
         ) : (
           <OwnerDashboard user={user} onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme} />

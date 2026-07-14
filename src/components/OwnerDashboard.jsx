@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { ThemeToggle } from './ThemeToggle';
 import { AddServiceModal } from './AddServiceModal';
 import { ServiceDetailModal } from './ServiceDetailModal';
+import { StaffManagementModal } from './StaffManagementModal';
 import { services as initialServices, initialMessages } from '../data/constants';
-import { fetchServices, createService, updateService, deleteService } from '../utils/api';
+import { fetchServices, createService, updateService, deleteService, fetchStaff, createStaff, updateStaff, deleteStaff } from '../utils/api';
 
 const ownerQuickActions = [
   { icon: '📋', title: 'Manage Services', desc: 'Add, edit, or remove treatments', id: 'owner-services' },
@@ -19,10 +20,10 @@ const todayAppointments = [
   { id: 4, client: 'Michael T.', service: 'Hair Styling & Cut', time: '3:30 PM', therapist: 'Marco', status: 'pending' },
 ];
 
-const staffMembers = [
-  { name: 'Sofia', role: 'Massage Therapist', rating: 4.9, clients: 128, image: '👩' },
-  { name: 'Luna', role: 'Esthetician', rating: 4.8, clients: 96, image: '👩' },
-  { name: 'Marco', role: 'Hairstylist', rating: 4.7, clients: 74, image: '👨' },
+const initialStaffMembers = [
+  { id: 'st1', name: 'Sofia', role: 'Massage Therapist', rating: 4.9, clients: 128, image: '👩', avatar: '👩', email: 'sofia@serenity.com', phone: '+1 (555) 101-1001', specialty: 'Deep tissue & sports massage' },
+  { id: 'st2', name: 'Luna', role: 'Esthetician', rating: 4.8, clients: 96, image: '👩', avatar: '👩', email: 'luna@serenity.com', phone: '+1 (555) 101-1002', specialty: 'Organic facials & chemical peels' },
+  { id: 'st3', name: 'Marco', role: 'Hairstylist', rating: 4.7, clients: 74, image: '👨', avatar: '👨', email: 'marco@serenity.com', phone: '+1 (555) 101-1003', specialty: 'Precision cuts & color treatment' },
 ];
 
 const getGreeting = () => {
@@ -37,10 +38,14 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
   const [messages, setMessages] = useState(initialMessages);
   const [draft, setDraft] = useState('');
   const [services, setServices] = useState(initialServices);
+  const [staffMembers, setStaffMembers] = useState(initialStaffMembers);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingService, setEditingService] = useState(null);
   const [viewingService, setViewingService] = useState(null);
   const [deletingService, setDeletingService] = useState(null);
+  const [showStaffModal, setShowStaffModal] = useState(false);
+  const [editingStaff, setEditingStaff] = useState(null);
+  const [deletingStaff, setDeletingStaff] = useState(null);
   const [notification, setNotification] = useState(null);
 
   const handleSend = (event) => {
@@ -69,9 +74,29 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
     }
   }, []);
 
+  // Fetch staff from backend on mount
+  const loadStaff = useCallback(async () => {
+    try {
+      const data = await fetchStaff();
+      if (data.length > 0) {
+        // Merge API data with existing local state to preserve fields
+        // the backend doesn't return (phone, specialty, avatar, etc.)
+        setStaffMembers((prev) =>
+          data.map((apiStaff) => {
+            const existing = prev.find((s) => s.id === apiStaff.id);
+            return existing ? { ...existing, ...apiStaff } : apiStaff;
+          })
+        );
+      }
+    } catch {
+      // Backend unavailable — keep the initial/fallback staff
+    }
+  }, []);
+
   useEffect(() => {
     loadServices();
-  }, [loadServices]);
+    loadStaff();
+  }, [loadServices, loadStaff]);
 
   // Auto-dismiss notification
   useEffect(() => {
@@ -234,33 +259,81 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
       </section>
 
       {/* ── Staff Roster ────────────────── */}
+      {/* ── Staff Roster ────────────────── */}
       <section className="panel" id="owner-staff">
-        <div className="section-heading">
-          <p className="eyebrow">Team</p>
-          <h2>Staff Roster</h2>
+        <div className="section-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <p className="eyebrow">Team</p>
+            <h2>Staff Roster</h2>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={() => setShowStaffModal(true)}>+ Add Staff</button>
         </div>
         <div className="owner-staff-grid">
-          {staffMembers.map((staff) => (
-            <div className="owner-staff-card" key={staff.name}>
-              <div className="owner-staff-avatar">{staff.image}</div>
-              <h3>{staff.name}</h3>
-              <p className="owner-staff-role">{staff.role}</p>
-              <div className="owner-staff-stats">
-                <div>
-                  <span className="owner-staff-stat-value">{staff.rating}</span>
-                  <span className="owner-staff-stat-label">Rating</span>
-                </div>
-                <div>
-                  <span className="owner-staff-stat-value">{staff.clients}</span>
-                  <span className="owner-staff-stat-label">Clients</span>
-                </div>
-                <div>
-                  <span className="owner-staff-stat-value">95%</span>
-                  <span className="owner-staff-stat-label">Satisfaction</span>
-                </div>
-              </div>
+          {staffMembers.length === 0 ? (
+            <div className="empty-state" style={{ gridColumn: '1 / -1' }}>
+              <span className="empty-state-icon">👥</span>
+              <h3>No staff members yet</h3>
+              <p>Add your first team member to get started.</p>
+              <button className="btn btn-primary" onClick={() => setShowStaffModal(true)}>+ Add Staff Member</button>
             </div>
-          ))}
+          ) : (
+            staffMembers.map((staff) => (
+              <div className="owner-staff-card" key={staff.id}>
+                <div className="owner-staff-card-actions">
+                  <button
+                    className="owner-action-btn"
+                    title="Edit staff member"
+                    onClick={() => setEditingStaff(staff)}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="owner-action-btn"
+                    title="Remove staff member"
+                    onClick={() => setDeletingStaff(staff)}
+                  >
+                    🗑️
+                  </button>
+                </div>
+                <div className="owner-staff-avatar">{staff.image || staff.avatar}</div>
+                <h3>{staff.name}</h3>
+                <p className="owner-staff-role">{staff.role}</p>
+                {staff.specialty && (
+                  <p className="owner-staff-specialty">{staff.specialty}</p>
+                )}
+                <div className="owner-staff-stats">
+                  <div>
+                    <span className="owner-staff-stat-value">{staff.rating || '—'}</span>
+                    <span className="owner-staff-stat-label">Rating</span>
+                  </div>
+                  <div>
+                    <span className="owner-staff-stat-value">{staff.clients || '—'}</span>
+                    <span className="owner-staff-stat-label">Clients</span>
+                  </div>
+                  <div>
+                    <span className="owner-staff-stat-value">95%</span>
+                    <span className="owner-staff-stat-label">Satisfaction</span>
+                  </div>
+                </div>
+                {(staff.email || staff.phone) && (
+                  <div className="owner-staff-contact">
+                    {staff.email && (
+                      <span className="owner-staff-contact-item">
+                        <span className="owner-staff-contact-icon">✉️</span>
+                        {staff.email}
+                      </span>
+                    )}
+                    {staff.phone && (
+                      <span className="owner-staff-contact-item">
+                        <span className="owner-staff-contact-icon">📞</span>
+                        {staff.phone}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -427,6 +500,78 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
                   }}
                 >
                   Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── View Service Detail Modal ────── */}
+      {/* ── Staff Management Modal ────────── */}
+      <StaffManagementModal
+        isOpen={showStaffModal || !!editingStaff}
+        onClose={() => {
+          setShowStaffModal(false);
+          setEditingStaff(null);
+        }}
+        editStaff={editingStaff}
+        onAdd={async (newStaff) => {
+          const created = await createStaff(newStaff);
+          setStaffMembers((prev) => [...prev, created]);
+          setNotification({ type: 'success', message: `"${created.name || newStaff.name}" has been added to your team.` });
+        }}
+        onEdit={async (updatedStaff) => {
+          const saved = await updateStaff(updatedStaff.id, updatedStaff);
+          setStaffMembers((prev) =>
+            prev.map((s) => (s.id === saved.id ? saved : s))
+          );
+          setNotification({ type: 'success', message: `"${saved.name}" has been updated.` });
+        }}
+      />
+
+      {/* ── Delete Staff Confirmation ───── */}
+      {deletingStaff && (
+        <div className="modal-overlay" onClick={() => setDeletingStaff(null)}>
+          <div
+            className="modal-container confirm-modal-container"
+            onClick={(e) => e.stopPropagation()}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="confirm-staff-title"
+          >
+            <div className="modal-accent confirm-accent" />
+            <div className="confirm-body">
+              <span className="confirm-icon">👋</span>
+              <h3 id="confirm-staff-title" className="confirm-title">Remove Staff Member?</h3>
+              <p className="confirm-message">
+                Are you sure you want to remove <strong>"{deletingStaff.name}"</strong> from your team?
+                This action cannot be undone.
+              </p>
+              <div className="confirm-actions">
+                <button
+                  className="btn btn-ghost confirm-cancel"
+                  onClick={() => setDeletingStaff(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn confirm-delete"
+                  onClick={async () => {
+                    const staffToDelete = deletingStaff;
+                    setDeletingStaff(null);
+                    try {
+                      await deleteStaff(staffToDelete.id);
+                      setStaffMembers((prev) => prev.filter((s) => s.id !== staffToDelete.id));
+                      setNotification({ type: 'success', message: `"${staffToDelete.name}" has been removed from your team.` });
+                    } catch (err) {
+                      // Fallback — remove locally
+                      setStaffMembers((prev) => prev.filter((s) => s.id !== staffToDelete.id));
+                      setNotification({ type: 'success', message: `"${staffToDelete.name}" has been removed locally (API unavailable).` });
+                    }
+                  }}
+                >
+                  Yes, Remove
                 </button>
               </div>
             </div>

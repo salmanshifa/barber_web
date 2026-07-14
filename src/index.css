@@ -2311,6 +2311,203 @@ h1, h2, h3, p { margin-top: 0; }
   }
 }
 
+/* ── Staff Card Actions ─────────────────────── */
+.owner-staff-card {
+  position: relative;
+}
+
+.owner-staff-card-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.owner-staff-card:hover .owner-staff-card-actions {
+  opacity: 1;
+}
+
+.owner-staff-card .owner-action-btn {
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  line-height: 1;
+  box-shadow: 0 2px 6px var(--overlay);
+}
+
+.owner-staff-card .owner-action-btn:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* ── Staff Specialty ───────────────────────── */
+.owner-staff-specialty {
+  font-size: 0.82rem;
+  color: var(--accent-dark);
+  margin: 0;
+  font-style: italic;
+  line-height: 1.4;
+  max-width: 220px;
+  text-align: center;
+}
+
+/* ── Staff Contact Info ────────────────────── */
+.owner-staff-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.owner-staff-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-light);
+  word-break: break-all;
+}
+
+.owner-staff-contact-icon {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .owner-staff-card-actions {
+    opacity: 1;
+  }
+}
+
+/* ── Staff Avatar Picker ─────────────────────── */
+.staff-avatar-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.staff-avatar-option {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.25s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.staff-avatar-option:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateY(-2px);
+}
+
+.staff-avatar-option.active {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--accent-soft), rgba(201, 149, 111, 0.2));
+  box-shadow: 0 4px 12px rgba(201, 149, 111, 0.2);
+  transform: scale(1.1);
+}
+
+/* ── Staff Role Grid ───────────────────────── */
+.staff-role-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.staff-role-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 6px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.staff-role-chip:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateY(-2px);
+}
+
+.staff-role-chip.active {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--accent-soft), rgba(201, 149, 111, 0.15));
+  box-shadow: 0 4px 12px rgba(201, 149, 111, 0.2);
+}
+
+.staff-role-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.staff-role-chip-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.staff-role-chip-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.staff-role-chip.active .staff-role-chip-label {
+  color: var(--accent-dark);
+}
+
+/* ── Staff Preview Card ────────────────────── */
+.staff-preview-card {
+  gap: 16px;
+}
+
+.staff-preview-avatar {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .staff-role-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .owner-staff-contact {
+    align-items: center;
+  }
+}
+
 /* ── Owner Dashboard Responsive ────────────── */
 @media (max-width: 1000px) {
   .owner-stats {
@@ -2808,6 +3005,65 @@ h1, h2, h3, p { margin-top: 0; }
 .modal-field-msg::before {
   content: '⚠';
   font-size: 0.75rem;
+}
+
+/* ── API Error Banner ─────────────────────── */
+.modal-api-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--error-bg);
+  border: 1px solid rgba(220, 100, 100, 0.3);
+  animation: shake 0.35s ease;
+}
+
+.modal-api-error-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.modal-api-error-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modal-api-error-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--error);
+  line-height: 1.4;
+}
+
+.modal-api-error-msg {
+  font-size: 0.84rem;
+  color: var(--error);
+  line-height: 1.5;
+  opacity: 0.9;
+  word-break: break-word;
+}
+
+.modal-api-error-close {
+  background: none;
+  border: none;
+  color: var(--error);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+.modal-api-error-close:hover {
+  opacity: 1;
+  background: rgba(220, 100, 100, 0.15);
 }
 
 /* ── Category Grid ────────────────────────── */
@@ -3380,6 +3636,412 @@ h1, h2, h3, p { margin-top: 0; }
 
   .confirm-actions {
     flex-direction: column-reverse;
+  }
+}
+
+/* ============================================
+   STAFF DASHBOARD
+   ============================================ */
+
+/* ── Staff Stats ──────────────────────────── */
+.staff-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.staff-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px var(--overlay);
+  transition: all 0.3s ease;
+}
+
+.staff-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--overlay);
+  border-color: var(--accent);
+}
+
+.staff-stat-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.staff-stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.staff-stat-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+
+.staff-stat-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ── Staff Appointments List ──────────────── */
+.staff-appointments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.staff-appointment-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.staff-appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--overlay);
+}
+
+.staff-appointment-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.staff-appointment-time-value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+  line-height: 1;
+}
+
+.staff-appointment-duration {
+  font-size: 0.75rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.staff-appointment-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.staff-appointment-client {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.staff-appointment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--accent-dark);
+  flex-shrink: 0;
+}
+
+.staff-appointment-client div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.staff-appointment-client strong {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.staff-appointment-service {
+  font-size: 0.82rem;
+  color: var(--text-light);
+}
+
+/* ── Staff Status Badges ──────────────────── */
+.staff-status-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.staff-status-confirmed {
+  background: rgba(107, 165, 131, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(107, 165, 131, 0.3);
+}
+
+.staff-status-checked-in {
+  background: rgba(201, 149, 111, 0.15);
+  color: var(--accent-dark);
+  border: 1px solid rgba(201, 149, 111, 0.3);
+}
+
+.staff-status-in-progress {
+  background: rgba(100, 149, 237, 0.15);
+  color: #4a7ac7;
+  border: 1px solid rgba(100, 149, 237, 0.3);
+}
+
+.staff-status-completed {
+  background: rgba(107, 165, 131, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(107, 165, 131, 0.3);
+}
+
+.staff-status-pending {
+  background: rgba(212, 165, 116, 0.15);
+  color: var(--warning);
+  border: 1px solid rgba(212, 165, 116, 0.3);
+}
+
+.staff-status-cancelled {
+  background: rgba(200, 60, 60, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(200, 60, 60, 0.2);
+  opacity: 0.7;
+}
+
+/* ── Staff Appointment Status Variant ─────── */
+.staff-appointment-cancelled {
+  opacity: 0.6;
+}
+
+.staff-appointment-completed .staff-appointment-time-value {
+  color: var(--success);
+}
+
+.staff-appointment-in-progress {
+  border-color: rgba(100, 149, 237, 0.3);
+  background: rgba(100, 149, 237, 0.05);
+}
+
+/* ── Staff Appointment Actions ────────────── */
+.staff-appointment-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.staff-action-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.staff-action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px var(--overlay);
+}
+
+.staff-action-confirm {
+  color: var(--success);
+  border-color: rgba(107, 165, 131, 0.3);
+}
+
+.staff-action-confirm:hover {
+  background: rgba(107, 165, 131, 0.15);
+}
+
+.staff-action-checkin {
+  color: var(--accent-dark);
+  border-color: rgba(201, 149, 111, 0.3);
+}
+
+.staff-action-checkin:hover {
+  background: rgba(201, 149, 111, 0.15);
+}
+
+.staff-action-start {
+  color: #4a7ac7;
+  border-color: rgba(100, 149, 237, 0.3);
+}
+
+.staff-action-start:hover {
+  background: rgba(100, 149, 237, 0.12);
+}
+
+.staff-action-complete {
+  color: var(--success);
+  border-color: rgba(107, 165, 131, 0.3);
+}
+
+.staff-action-complete:hover {
+  background: rgba(107, 165, 131, 0.2);
+}
+
+.staff-action-cancel {
+  color: var(--error);
+  border-color: rgba(200, 60, 60, 0.2);
+  padding: 6px 10px;
+}
+
+.staff-action-cancel:hover {
+  background: rgba(200, 60, 60, 0.12);
+}
+
+/* ── Availability Section ─────────────────── */
+.staff-availability-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.staff-availability-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.staff-availability-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--overlay);
+  border-color: var(--accent);
+}
+
+.staff-availability-off {
+  opacity: 0.6;
+}
+
+.staff-availability-day {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.staff-availability-day-name {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.staff-availability-time {
+  font-size: 0.82rem;
+  color: var(--text-light);
+}
+
+.staff-availability-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  align-self: flex-start;
+}
+
+.staff-availability-status.available {
+  background: rgba(107, 165, 131, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(107, 165, 131, 0.3);
+}
+
+.staff-availability-status.off {
+  background: rgba(200, 60, 60, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(200, 60, 60, 0.2);
+}
+
+/* ── Modal Divider ────────────────────────── */
+.modal-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.modal-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.modal-divider-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* ── Staff Dashboard Responsive ───────────── */
+@media (max-width: 900px) {
+  .staff-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .staff-availability-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .staff-appointment-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .staff-appointment-time {
+    flex-direction: row;
+    gap: 12px;
+    min-width: auto;
+  }
+
+  .staff-appointment-body {
+    width: 100%;
+  }
+
+  .staff-appointment-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .staff-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-availability-grid {
+    grid-template-columns: 1fr;
   }
 }
 
