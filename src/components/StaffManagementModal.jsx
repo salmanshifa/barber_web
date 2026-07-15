@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { SERVICE_CATEGORIES } from '../data/constants';
 
 const STAFF_ROLES = [
   { value: 'massage-therapist', label: 'Massage Therapist', icon: '💆' },
@@ -17,11 +18,13 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
   const isEditMode = !!editStaff;
 
   const defaultForm = {
-    name: '',
+    firstName: '',
+    lastName: '',
     role: 'massage-therapist',
     email: '',
     phone: '',
     specialty: '',
+    serviceCategories: [],
     avatar: '👩',
     username: '',
     password: '',
@@ -33,7 +36,7 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
   const [apiError, setApiError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCredentialPasswords, setShowCredentialPasswords] = useState({ password: false, confirm: false });
-  const nameRef = useRef(null);
+  const firstNameRef = useRef(null);
   const modalRef = useRef(null);
 
   // Initialize form when opening
@@ -42,12 +45,18 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
       const matchedRole = STAFF_ROLES.find(
         (r) => r.label === editStaff.role || r.value === editStaff.role
       );
+      const fullName = (editStaff.name || '').trim();
+      const spaceIdx = fullName.indexOf(' ');
+      const first = spaceIdx === -1 ? fullName : fullName.slice(0, spaceIdx);
+      const last = spaceIdx === -1 ? '' : fullName.slice(spaceIdx + 1);
       setForm({
-        name: editStaff.name || '',
+        firstName: first,
+        lastName: last,
         role: matchedRole?.value || editStaff.role || 'other',
         email: editStaff.email || '',
         phone: editStaff.phone || '',
         specialty: editStaff.specialty || '',
+        serviceCategories: editStaff.serviceCategories || [],
         avatar: editStaff.avatar || editStaff.image || '👩',
         username: editStaff.username || '',
         password: '',
@@ -61,8 +70,8 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
   }, [isOpen, editStaff]);
 
   useEffect(() => {
-    if (isOpen && nameRef.current) {
-      const timer = setTimeout(() => nameRef.current?.focus(), 150);
+    if (isOpen && firstNameRef.current) {
+      const timer = setTimeout(() => firstNameRef.current?.focus(), 150);
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
@@ -111,10 +120,16 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
 
   const validate = () => {
     const newErrors = {};
-    if (!form.name.trim()) {
-      newErrors.name = 'Staff name is required';
-    } else if (form.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+    if (!form.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    } else if (form.firstName.trim().length < 2) {
+      newErrors.firstName = 'First name must be at least 2 characters';
+    }
+
+    if (!form.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    } else if (form.lastName.trim().length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters';
     }
 
     if (!form.role) {
@@ -172,12 +187,13 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
 
     const selectedRole = STAFF_ROLES.find((r) => r.value === form.role);
     const staffData = {
-      name: form.name.trim(),
+      name: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
       role: selectedRole?.label || form.role,
       roleValue: form.role,
       email: form.email.trim(),
       phone: form.phone.trim(),
       specialty: form.specialty.trim(),
+      serviceCategories: form.serviceCategories,
       avatar: form.avatar,
       image: form.avatar,
       rating: editStaff?.rating || 0,
@@ -287,22 +303,79 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
             </div>
           </div>
 
-          {/* Name */}
-          <div className={`modal-field ${errors.name ? 'modal-field-error' : ''}`}>
-            <label htmlFor="staff-name">
-              Full Name <span className="modal-required">*</span>
-            </label>
-            <input
-              ref={nameRef}
-              id="staff-name"
-              type="text"
-              placeholder="e.g. Sofia Martinez"
-              value={form.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              disabled={isSubmitting}
-              autoComplete="off"
-            />
-            {errors.name && <span className="modal-field-msg">{errors.name}</span>}
+          {/* Name — First & Last */}
+          <div className="modal-row">
+            <div className={`modal-field ${errors.firstName ? 'modal-field-error' : ''}`}>
+              <label htmlFor="staff-first-name">
+                First Name <span className="modal-required">*</span>
+              </label>
+              <input
+                ref={firstNameRef}
+                id="staff-first-name"
+                type="text"
+                placeholder="e.g. Sofia"
+                value={form.firstName}
+                onChange={(e) => handleChange('firstName', e.target.value)}
+                disabled={isSubmitting}
+                autoComplete="given-name"
+              />
+              {errors.firstName && <span className="modal-field-msg">{errors.firstName}</span>}
+            </div>
+
+            <div className={`modal-field ${errors.lastName ? 'modal-field-error' : ''}`}>
+              <label htmlFor="staff-last-name">
+                Last Name <span className="modal-required">*</span>
+              </label>
+              <input
+                id="staff-last-name"
+                type="text"
+                placeholder="e.g. Martinez"
+                value={form.lastName}
+                onChange={(e) => handleChange('lastName', e.target.value)}
+                disabled={isSubmitting}
+                autoComplete="family-name"
+              />
+              {errors.lastName && <span className="modal-field-msg">{errors.lastName}</span>}
+            </div>
+          </div>
+
+          {/* Email & Phone row */}
+          <div className="modal-row">
+            <div className={`modal-field ${errors.email ? 'modal-field-error' : ''}`}>
+              <label htmlFor="staff-email">
+                Email <span className="modal-optional">(optional)</span>
+              </label>
+              <input
+                id="staff-email"
+                type="email"
+                placeholder="sofia@serenity.com"
+                value={form.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                disabled={isSubmitting}
+                readOnly={isEditMode}
+                autoComplete="email"
+                className={isEditMode ? 'readonly-field' : ''}
+              />
+              {errors.email && <span className="modal-field-msg">{errors.email}</span>}
+            </div>
+
+            <div className={`modal-field ${errors.phone ? 'modal-field-error' : ''}`}>
+              <label htmlFor="staff-phone">
+                Phone <span className="modal-optional">(optional)</span>
+              </label>
+              <input
+                id="staff-phone"
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                value={form.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                disabled={isSubmitting}
+                readOnly={isEditMode}
+                autoComplete="tel"
+                className={isEditMode ? 'readonly-field' : ''}
+              />
+              {errors.phone && <span className="modal-field-msg">{errors.phone}</span>}
+            </div>
           </div>
 
           {/* Role */}
@@ -327,38 +400,32 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
             {errors.role && <span className="modal-field-msg">{errors.role}</span>}
           </div>
 
-          {/* Email & Phone row */}
-          <div className="modal-row">
-            <div className={`modal-field ${errors.email ? 'modal-field-error' : ''}`}>
-              <label htmlFor="staff-email">
-                Email <span className="modal-optional">(optional)</span>
-              </label>
-              <input
-                id="staff-email"
-                type="email"
-                placeholder="sofia@serenity.com"
-                value={form.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                disabled={isSubmitting}
-                autoComplete="email"
-              />
-              {errors.email && <span className="modal-field-msg">{errors.email}</span>}
-            </div>
-
-            <div className={`modal-field ${errors.phone ? 'modal-field-error' : ''}`}>
-              <label htmlFor="staff-phone">
-                Phone <span className="modal-optional">(optional)</span>
-              </label>
-              <input
-                id="staff-phone"
-                type="tel"
-                placeholder="+1 (555) 123-4567"
-                value={form.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
-                disabled={isSubmitting}
-                autoComplete="tel"
-              />
-              {errors.phone && <span className="modal-field-msg">{errors.phone}</span>}
+          {/* Service Categories */}
+          <div className="modal-field">
+            <label>
+              Service Categories <span className="modal-optional">(optional)</span>
+            </label>
+            <div className="modal-category-grid">
+              {SERVICE_CATEGORIES.map((cat) => {
+                const isSelected = form.serviceCategories.includes(cat.value);
+                return (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    className={`modal-category-chip ${isSelected ? 'active' : ''}`}
+                    onClick={() => {
+                      const updated = isSelected
+                        ? form.serviceCategories.filter((v) => v !== cat.value)
+                        : [...form.serviceCategories, cat.value];
+                      handleChange('serviceCategories', updated);
+                    }}
+                    disabled={isSubmitting}
+                  >
+                    <span className="modal-category-icon">{cat.icon}</span>
+                    <span className="modal-category-label">{cat.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -460,14 +527,21 @@ export function StaffManagementModal({ isOpen, onClose, onAdd, onEdit, editStaff
           )}
 
           {/* Preview */}
-          {form.name.trim() && (
+          {(form.firstName.trim() || form.lastName.trim()) && (
             <div className="modal-preview">
               <span className="modal-preview-label">Preview</span>
               <div className="modal-preview-card staff-preview-card">
                 <span className="staff-preview-avatar">{form.avatar}</span>
                 <div className="modal-preview-info">
-                  <strong>{form.name.trim()}</strong>
+                  <strong>{`${form.firstName.trim()} ${form.lastName.trim()}`.trim()}</strong>
                   <span>{STAFF_ROLES.find((r) => r.value === form.role)?.label || form.role}</span>
+                  {form.serviceCategories.length > 0 && (
+                    <span className="staff-preview-categories">
+                      {form.serviceCategories.map((v) =>
+                        SERVICE_CATEGORIES.find((c) => c.value === v)?.icon
+                      ).join(' ')}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>

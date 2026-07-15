@@ -123,7 +123,7 @@ export function LoginPage({ onLogin, onBack, theme, onToggleTheme }) {
         body: JSON.stringify({
           username: registerData.username,
           email: registerData.email,
-          mobileNumber: registerData.mobile,
+          phone: registerData.mobile,
           role: userType === 'owner' ? 'SHOP_OWNER' : 'CUSTOMER',
           enabled: true,
           password: registerData.password,

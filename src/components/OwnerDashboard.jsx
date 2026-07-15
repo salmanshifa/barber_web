@@ -21,9 +21,9 @@ const todayAppointments = [
 ];
 
 const initialStaffMembers = [
-  { id: 'st1', name: 'Sofia', role: 'Massage Therapist', rating: 4.9, clients: 128, image: '👩', avatar: '👩', email: 'sofia@serenity.com', phone: '+1 (555) 101-1001', specialty: 'Deep tissue & sports massage' },
-  { id: 'st2', name: 'Luna', role: 'Esthetician', rating: 4.8, clients: 96, image: '👩', avatar: '👩', email: 'luna@serenity.com', phone: '+1 (555) 101-1002', specialty: 'Organic facials & chemical peels' },
-  { id: 'st3', name: 'Marco', role: 'Hairstylist', rating: 4.7, clients: 74, image: '👨', avatar: '👨', email: 'marco@serenity.com', phone: '+1 (555) 101-1003', specialty: 'Precision cuts & color treatment' },
+  { id: 'st1', name: 'Sofia', role: 'Massage Therapist', rating: 4.9, clients: 128, image: '👩', avatar: '👩', email: 'sofia@serenity.com', phone: '+1 (555) 101-1001', specialty: 'Deep tissue & sports massage', serviceCategories: ['massage', 'stone', 'aroma'] },
+  { id: 'st2', name: 'Luna', role: 'Esthetician', rating: 4.8, clients: 96, image: '👩', avatar: '👩', email: 'luna@serenity.com', phone: '+1 (555) 101-1002', specialty: 'Organic facials & chemical peels', serviceCategories: ['facial', 'body'] },
+  { id: 'st3', name: 'Marco', role: 'Hairstylist', rating: 4.7, clients: 74, image: '👨', avatar: '👨', email: 'marco@serenity.com', phone: '+1 (555) 101-1003', specialty: 'Precision cuts & color treatment', serviceCategories: ['hair'] },
 ];
 
 const getGreeting = () => {
@@ -84,7 +84,19 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
         setStaffMembers((prev) =>
           data.map((apiStaff) => {
             const existing = prev.find((s) => s.id === apiStaff.id);
-            return existing ? { ...existing, ...apiStaff } : apiStaff;
+            // Preserve local-only fields the API doesn't support
+            return existing
+              ? {
+                  ...existing,
+                  ...apiStaff,
+                  serviceCategories: existing.serviceCategories?.length
+                    ? existing.serviceCategories
+                    : apiStaff.serviceCategories,
+                  specialty: existing.specialty
+                    ? existing.specialty
+                    : apiStaff.specialty,
+                }
+              : apiStaff;
           })
         );
       }
@@ -517,16 +529,31 @@ export function OwnerDashboard({ user, onLogout, theme, onToggleTheme }) {
         }}
         editStaff={editingStaff}
         onAdd={async (newStaff) => {
-          const created = await createStaff(newStaff);
-          setStaffMembers((prev) => [...prev, created]);
-          setNotification({ type: 'success', message: `"${created.name || newStaff.name}" has been added to your team.` });
+          try {
+            const created = await createStaff(newStaff);
+            setStaffMembers((prev) => [...prev, created]);
+            setNotification({ type: 'success', message: `"${created.name || newStaff.name}" has been added to your team.` });
+          } catch {
+            // Fallback — add locally
+            const localStaff = { ...newStaff, id: `local_${Date.now()}` };
+            setStaffMembers((prev) => [...prev, localStaff]);
+            setNotification({ type: 'success', message: `"${localStaff.name}" has been added locally (API unavailable).` });
+          }
         }}
         onEdit={async (updatedStaff) => {
-          const saved = await updateStaff(updatedStaff.id, updatedStaff);
-          setStaffMembers((prev) =>
-            prev.map((s) => (s.id === saved.id ? saved : s))
-          );
-          setNotification({ type: 'success', message: `"${saved.name}" has been updated.` });
+          try {
+            const saved = await updateStaff(updatedStaff.id, updatedStaff);
+            setStaffMembers((prev) =>
+              prev.map((s) => (s.id === saved.id ? saved : s))
+            );
+            setNotification({ type: 'success', message: `"${saved.name}" has been updated.` });
+          } catch {
+            // Fallback — update locally
+            setStaffMembers((prev) =>
+              prev.map((s) => (s.id === updatedStaff.id ? { ...s, ...updatedStaff } : s))
+            );
+            setNotification({ type: 'success', message: `"${updatedStaff.name}" has been updated locally (API unavailable).` });
+          }
         }}
       />
 

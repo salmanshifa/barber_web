@@ -47,7 +47,7 @@ const CATEGORY_ICONS = {
 
 // ─── Services API ───────────────────────────
 
-/** Fetch all services from the backend */
+/** Fetch all services from the backend (owner dashboard) */
 export async function fetchServices() {
   const response = await fetch(`${API_BASE_URL}/services/owner`, {
     headers: authHeaders(),
@@ -57,6 +57,21 @@ export async function fetchServices() {
   }
   const json = await response.json();
   // Backend may return { data: [...] } or array directly
+  const list = Array.isArray(json) ? json : (json.data || json.content || []);
+  return list.map(mapServiceFromApi);
+}
+
+/** Fetch services for the customer/public portal */
+export async function fetchPublicServices() {
+  const token = getAuthToken();
+  const response = await fetch(`${API_BASE_URL}/services`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch services (${response.status})`);
+  }
+  const json = await response.json();
+  // Response shape: { status, message, data: [...] }
   const list = Array.isArray(json) ? json : (json.data || json.content || []);
   return list.map(mapServiceFromApi);
 }
@@ -214,6 +229,49 @@ export async function fetchStaffAppointments(staffId) {
   return list;
 }
 
+// ─── Bookings API ────────────────────────────
+
+/** Fetch bookings for the current customer */
+export async function fetchBookings() {
+  const response = await fetch(`${API_BASE_URL}/bookings`, {
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch bookings (${response.status})`);
+  }
+  const json = await response.json();
+  const list = Array.isArray(json) ? json : (json.data || json.content || []);
+  return list.map(mapBookingFromApi);
+}
+
+/** Create a new booking */
+export async function createBooking({ appointmentTime, endTime, serviceId }) {
+  const response = await fetch(`${API_BASE_URL}/bookings`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ appointmentTime, endTime, serviceId }),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to create booking (${response.status})`);
+  }
+  const json = await response.json();
+  return mapBookingFromApi(json.data || json);
+}
+
+/** Cancel a booking */
+export async function cancelBooking(id) {
+  const response = await fetch(`${API_BASE_URL}/bookings/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || `Failed to cancel booking (${response.status})`);
+  }
+  return true;
+}
+
 // ─── Staff mappers ────────────────────────────
 
 /** Frontend → Backend */
@@ -229,12 +287,14 @@ function mapStaffToApi(frontend) {
   return {
     username: frontend.username || '',
     email: frontend.email || '',
-    mobileNumber: frontend.phone || '',
+    phone: frontend.phone || '',
     position,
     enabled: true,
     password: frontend.password || '',
     firstName,
     lastName,
+    specialty: frontend.specialty || '',
+    serviceCategories: frontend.serviceCategories || [],
     employmentStatus: 'ACTIVE',
   };
 }
@@ -252,6 +312,7 @@ function mapStaffFromApi(backend) {
     email: backend.email || '',
     phone: backend.phone || '',
     specialty: backend.specialty || '',
+    serviceCategories: backend.serviceCategories || [],
     avatar: '👩', // Default — user can change in the UI
     image: '',
     rating: backend.rating || 0,
@@ -286,5 +347,49 @@ function mapServiceFromApi(backend) {
     price: backend.price ? `$${parseFloat(backend.price).toFixed(0)}` : '$0',
     time: backend.durationMinutes ? `${backend.durationMinutes} min` : '—',
     status: backend.status || 'ACTIVE',
+  };
+}
+
+// ─── Booking mappers ──────────────────────────
+
+const STATUS_LABELS = {
+  PENDING: 'Pending',
+  CONFIRMED: 'Confirmed',
+  CANCELLED: 'Cancelled',
+  COMPLETED: 'Completed',
+};
+
+const STATUS_ICONS = {
+  PENDING: '⏳',
+  CONFIRMED: '✅',
+  CANCELLED: '❌',
+  COMPLETED: '✓',
+};
+
+/** Backend → Frontend */
+function mapBookingFromApi(backend) {
+  const start = backend.appointmentTime ? new Date(backend.appointmentTime) : null;
+  const end = backend.endTime ? new Date(backend.endTime) : null;
+
+  return {
+    id: backend.id,
+    serviceId: backend.serviceId,
+    staffId: backend.staffId,
+    status: backend.status || 'PENDING',
+    statusLabel: STATUS_LABELS[backend.status] || backend.status,
+    statusIcon: STATUS_ICONS[backend.status] || '📅',
+    appointmentTime: backend.appointmentTime,
+    endTime: backend.endTime,
+    date: start ? start.toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+    }) : '—',
+    time: start ? start.toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit',
+    }) : '—',
+    endTimeFormatted: end ? end.toLocaleTimeString('en-US', {
+      hour: 'numeric', minute: '2-digit',
+    }) : '—',
+    notes: backend.notes || '',
+    createdAt: backend.createdAt,
   };
 }
